@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#103778">
+  <title>IP 与 MAC · 地址随数据走</title>
+  <style>:root{--navy:#0a2463;--blue:#0545b7;--text:#1d2b4f;--muted:#60749b;--line:#c0d6fd;--font:"Times New Roman","SimSun","Songti SC","Noto Serif CJK SC",serif}*{box-sizing:border-box}body{margin:0;background:#fff;color:var(--text);font-family:var(--font);font-size:17px}button,input,select{font:inherit}button{cursor:pointer;border:1px solid transparent;transition:background .18s,box-shadow .18s}button:disabled{opacity:.35;cursor:default}button:hover:not(:disabled){filter:brightness(.97)}button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e69a00;outline-offset:3px}.app{height:100dvh;min-height:620px;max-width:1920px;margin:auto;padding:20px 30px 12px;display:grid;grid-template-rows:50px minmax(390px,1fr) 85px 54px;gap:12px}.masthead{display:flex;align-items:center;gap:40px}h1{font-size:30px;color:var(--blue);margin:0;white-space:nowrap}.header-actions{display:flex;align-items:center;gap:8px;margin-left:auto}.destinations{display:flex;gap:6px;background:#eff5ff;border-radius:10px;padding:4px}.destination{padding:9px 26px;border-radius:7px;background:transparent;color:var(--blue);font-size:17px}.destination.selected{background:var(--blue);color:#fff;box-shadow:0 2px 5px #0545b71c}.settings-button{background:#fff;border:1px solid #c0d6fd;color:var(--blue);border-radius:8px;padding:9px 19px}.quiet{color:var(--blue);background:transparent;border-radius:8px;padding:9px 13px;font-size:15px}.header-actions .quiet{font:23px "Times New Roman",serif;padding:4px;width:32px;height:32px}.network-card{position:relative;border:1px solid #c0d6fd;border-radius:18px;background:#fff;overflow:hidden}.network{position:absolute;inset:48px 10px 20px}.network svg{display:block;width:100%;height:100%;overflow:hidden}.network text{font-family:var(--font)}.status-line{position:absolute;left:24px;top:18px;right:24px;z-index:2;pointer-events:none}.status-line h2{font-size:22px;line-height:1.4;font-weight:400;margin:0;color:var(--navy)}.status-line.error-state h2{color:#b13621;font-size:18px}.device{cursor:pointer;outline:none;opacity:1;transition:opacity .25s}.device-muted{opacity:.34}.device:hover,.device:focus-visible{opacity:1}.device:hover .node-label,.device:focus-visible .node-label{fill:#0545b7}.device:focus-visible .device-ground{stroke:#4385fa;stroke-width:3;opacity:.6}.node-label,.node-address{paint-order:stroke;stroke:#f5f9ff;stroke-width:3px;stroke-linejoin:round}.node-badge{display:none}.wireless-zone{fill:#f0f6ff;stroke:#c0d6fd;stroke-width:1.8;transition:opacity .25s,stroke .25s,fill .25s}.wireless-zone.link-active{fill:#e9f2ff;stroke:#4385fa;stroke-width:2.4}.wireless-zone.link-muted{opacity:.35}.zone-title{fill:#0545b7}.network[data-active-link="N2"] .zone-title,.network[data-active-link="N3"] .zone-title{opacity:.35}.wired-links{stroke:#98b9ef;stroke-width:2.5}.wired-links text{stroke:none;fill:#0545b7;font-size:20px;letter-spacing:1px}.wired-links .link-active{stroke:#0545b7;stroke-width:4;opacity:1}.wired-links .link-muted{opacity:.25}.wired-links g{transition:opacity .25s}.receive-ring{stroke:#4385fa}.probe-toast{position:absolute;z-index:3;padding:8px 16px;border:1px solid #f5bb67;border-radius:24px;background:#fff6e7;color:#ad580a;font-size:15px;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .2s,transform .2s;white-space:nowrap;pointer-events:none}.probe-toast.visible{opacity:1;visibility:visible;transform:none;pointer-events:auto}.node-info{position:absolute;bottom:10px;left:15px;max-width:95%;font-size:13px;color:#1d2b4f;pointer-events:none}.node-info:not(:empty){padding:7px 12px;background:#fffffff5;border:1px solid #c0d6fd;border-radius:7px}.frame-card{display:flex;align-items:center;gap:12px}.frame-heading{width:125px;flex-shrink:0;padding-left:8px;font-size:15px;color:#0545b7}.frame-strip{display:grid;grid-template-columns:1.15fr 1.15fr 1fr 1fr;gap:6px;flex:1;min-width:0}.field{padding:10px 15px;min-width:0;border-radius:7px;border:1px solid transparent}.field span{display:block;font-size:14px;margin-bottom:6px}.field strong{font-size:clamp(17px,1.6vw,26px);font-weight:bold;white-space:nowrap}.mac{color:#fff;background:#d2660f}.ip{color:#0545b7;background:#c0d6fd;border-color:#4385fa}.field.changed{animation:fieldFlash .6s ease}.playback{display:flex;align-items:center;justify-content:space-between;gap:12px}.transport,.playback-right{display:flex;gap:8px;align-items:center}.primary{background:#0545b7;color:#fff;padding:11px 24px;border-radius:8px}.play-button{border:1px solid #4385fa;background:#fff;color:#0545b7;padding:11px 19px;border-radius:8px;min-width:135px}.return-button{border:1px solid #4385fa;background:#eff5ff;color:#0545b7;padding:11px 18px;border-radius:8px}#speed{background:#fff;color:#0545b7;font-size:14px;border:0;padding:7px 4px}.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.probe-heading{display:flex;align-items:center;gap:9px;color:#d2660f}.probe-heading h2{margin:0;font-size:23px}.radar-icon{font-size:29px}.mini-close{margin-left:auto;background:transparent;color:#60749b;font:27px Arial,sans-serif}.listen-led{display:none}.probe-state{color:#60749b;font-size:14px;margin:14px 0}.observation{border-top:1px solid #c0d6fd;padding-top:15px}.observation-title{display:flex;justify-content:space-between;color:#d2660f}.observation-title small{font-size:13px}.observation dl{margin:12px 0 20px}.observation dl>div{display:flex;justify-content:space-between;align-items:center;margin-top:10px}.observation dt{color:#60749b;font-size:14px}.observation dd{margin:0;color:#d2660f;font-size:21px}.ip-observation{border-top:1px solid #c0d6fd;padding-top:15px;color:#0545b7;display:flex;flex-wrap:wrap;justify-content:space-between}.ip-observation small{font-size:13px}.probe-ip-values{display:flex;justify-content:space-between;width:100%;padding-top:14px;gap:12px;font-size:18px}.probe-note{font-size:13px;color:#60749b;margin:20px 0 0}#probeDialog{max-width:480px}@keyframes fieldFlash{35%{filter:brightness(1.13)}}
+dialog{border:1px solid #dce5f2;border-radius:18px;padding:28px;color:var(--text);box-shadow:0 20px 90px #102a6233;width:min(650px,calc(100vw - 32px));max-height:90dvh}dialog::backdrop{background:#132c4c4d;backdrop-filter:blur(5px)}.dialog-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:15px}.dialog-heading h2{font-size:24px;color:var(--navy);margin:0}.eyebrow{font-size:12px;letter-spacing:1px;color:var(--muted);margin-bottom:7px}.icon-close{font-family:Arial,sans-serif;background:#eef2f9;border:0;border-radius:50%;width:33px;height:33px;color:var(--muted);font-size:24px;flex-shrink:0}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.form-grid label{font-size:15px;color:#70839d}.form-grid input{width:100%;padding:11px;border:1px solid #d1ddeb;border-radius:8px;margin-top:8px;color:var(--navy);background:#f9fbff;font-size:20px}.switches{margin-top:24px;border-top:1px solid var(--line)}.switches label{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #edf1f7}.switches small{display:block;color:var(--muted);font-size:12px;margin-top:6px}.switches input{appearance:none;flex-shrink:0;width:40px;height:23px;border-radius:20px;background:#c5d0e1;position:relative;cursor:pointer;margin-left:20px}.switches input:after{content:"";position:absolute;width:17px;height:17px;border-radius:50%;background:white;left:3px;top:3px;transition:transform .2s}.switches input:checked{background:var(--blue)}.switches input:checked:after{transform:translateX(17px)}.parameter-help{font-size:13px;color:var(--muted);margin-top:18px;line-height:1.7}.parameter-help summary{cursor:pointer}.dialog-footer{display:flex;justify-content:space-between;align-items:center;margin-top:25px}.help-dialog{font-size:16px;line-height:1.8}.help-dialog h3{font-size:18px;margin:20px 0 4px;color:var(--navy)}.help-dialog p{margin:8px 0;color:#687d99}.help-dialog a{color:var(--blue)}#compareDialog{width:min(1050px,calc(100vw - 32px))}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:14px}th,td{text-align:left;padding:12px 15px;border-top:1px solid #edf0f6}th{font-weight:400;background:#f8faff;color:var(--muted)}@media(min-width:1600px){.app{padding:24px 42px 16px;grid-template-rows:54px minmax(480px,1fr) 90px 58px;gap:14px}h1{font-size:34px}.status-line{top:22px;left:30px}.status-line h2{font-size:25px}.network{inset:55px 16px 22px}.field span{font-size:16px}.destination{font-size:19px;padding:10px 32px}}
+@media(min-width:761px) and (max-height:820px){.app{padding:10px 22px 8px;grid-template-rows:42px minmax(340px,1fr) 74px 48px;gap:9px}h1{font-size:28px}.destination{padding:8px 24px}.settings-button{padding:8px 15px}.status-line{top:14px}.status-line h2{font-size:20px}.network{inset:42px 10px 14px}.field{padding:8px 12px}.field span{font-size:12px;margin-bottom:5px}.field strong{font-size:20px}.frame-heading{font-size:14px;width:120px}.primary,.play-button,.return-button{padding-top:9px;padding-bottom:9px}}
+@media(max-width:1100px) and (min-width:761px){.masthead{gap:24px}.app{padding-left:18px;padding-right:18px}.destination{padding:8px 16px}.frame-heading{width:95px;font-size:13px}.field{padding:9px 10px}.field span{font-size:11px}.field strong{font-size:15px}.transport,.playback-right{gap:4px}.quiet{padding:8px;font-size:13px}.primary,.play-button,.return-button{padding:10px 13px;font-size:14px}.play-button{min-width:120px}.probe-toast{font-size:13px;padding:7px 12px}}
+@media(max-width:760px){.app{height:auto;min-height:100dvh;padding:12px 12px 124px;display:flex;flex-direction:column;gap:10px}.masthead{flex-wrap:wrap;gap:11px;justify-content:space-between}h1{font-size:26px}.header-actions{order:1;gap:6px}.header-actions .quiet{font-size:21px;width:28px;height:28px}#fullscreenBtn{display:none}.settings-button{font-size:13px;padding:7px 15px}.destinations{order:2;width:100%;gap:5px}.destination{flex:1;font-size:15px;padding:8px 10px}.network-card{height:540px;min-height:540px;border-radius:14px}.network{inset:43px 1px 15px}.status-line{left:14px;right:14px;top:13px}.status-line h2{font-size:16px}.status-line.error-state h2{font-size:14px}.probe-toast{font-size:11px;padding:6px 10px}.node-info{font-size:10px;bottom:8px;left:10px;max-width:94%}.node-info:not(:empty){padding:4px 8px}.frame-card{flex-direction:column;align-items:stretch;gap:7px}.frame-heading{padding:0 3px;width:auto;font-size:12px}.frame-strip{grid-template-columns:1fr 1fr;gap:5px}.field{padding:8px 10px}.field span{font-size:11px;margin-bottom:5px}.field strong{font-size:16px}.playback{position:fixed;z-index:5;bottom:0;left:0;right:0;padding:9px 12px;background:#fffffff7;backdrop-filter:blur(10px);border-top:1px solid #c0d6fd;flex-wrap:wrap;gap:8px}.transport,.playback-right{width:100%;justify-content:space-between;gap:3px}.quiet{font-size:12px;padding:8px 4px}.primary{padding:10px 16px;font-size:14px}.play-button{padding:10px 12px;font-size:13px;min-width:112px}.return-button{padding:7px 13px;font-size:13px}#speed{font-size:12px}.observation dd{font-size:18px}.probe-heading h2{font-size:21px}.probe-ip-values{font-size:15px}dialog{padding:22px 18px}.dialog-heading h2{font-size:22px}.form-grid{gap:15px 10px}.form-grid input{font-size:17px}.form-grid label{font-size:13px}.switches b{font-size:15px}.switches small{font-size:11px;max-width:230px}.dialog-footer .primary{font-size:15px}.help-dialog{font-size:14px}.help-dialog h3{font-size:16px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.network[data-protocol="ARP"] .receive-ring{stroke:#12976B}.device[data-node="probe"] .receive-ring{stroke:#E69A00!important}
+</style><style>.assembly-panel{position:absolute;z-index:4;pointer-events:none;will-change:transform,opacity;width:420px}.assembly-panel[hidden]{display:none}.assembly-shell{display:flex;align-items:stretch;gap:4px;padding:5px;border:2px solid #d2660f;border-radius:10px;background:#fffffff0;box-shadow:0 6px 20px #0a246312}.assembly-mac{display:flex;gap:3px;flex:0 0 40%;will-change:transform,opacity}.assembly-mac span{flex:1;padding:10px 3px;border-radius:5px;background:#d2660f;color:#fff;font-size:15px;text-align:center;white-space:nowrap}.assembly-core{display:flex;gap:3px;flex:1;min-width:0;padding:3px;border:1px solid #4385fa;background:#edf3ff;border-radius:6px;will-change:transform,opacity}.assembly-core span{flex:1;display:grid;place-content:center;white-space:nowrap;font-size:15px;color:#0545b7;border-radius:3px;background:#c0d6fd;padding:5px 3px}.assembly-core .assembly-data{background:#fff;color:#1d2b4f;flex:.7}.assembly-core .assembly-arp{color:#12976b;background:#e1f3eb}.assembly-panel[data-mode="arp"] .assembly-core{background:#effaf5;border-color:#12976b}.assembly-panel[data-mode="decapsulate"] .assembly-core{box-shadow:0 0 0 3px #4385fa10}@media(max-width:760px){.network-card{height:660px;min-height:660px}.assembly-mac span,.assembly-core span{font-size:12px;padding:8px 2px}.assembly-shell{gap:3px;padding:4px;border-radius:8px}.assembly-core{padding:2px;gap:2px}}
+@media(min-width:761px){.assembly-mac span,.assembly-core span{font-size:14px}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="masthead"><h1>IP 与 MAC</h1><div class="destinations" role="group" aria-label="选择目的设备"><button id="cashPreset" class="destination" aria-pressed="false">收银终端</button><button id="serverPreset" class="destination selected" aria-pressed="true">外地服务器</button></div><div class="header-actions"><button id="settingsBtn" class="settings-button">调参</button><button id="helpBtn" class="quiet" title="模型说明" aria-label="模型说明">?</button><button id="fullscreenBtn" class="quiet" title="切换全屏" aria-label="切换全屏">⛶</button></div></header>
+  <section class="network-card">
+    <div class="status-line" aria-live="polite"><h2 id="eventTitle">选择目的设备，开始演示</h2></div>
+    <div id="network" class="network" aria-label="通信网络拓扑"></div>
+    <button id="probeToast" class="probe-toast" aria-label="查看探针捕获详情" aria-hidden="true" tabindex="-1"><span id="probeConclusion">MAC 可见 · IP 已加密</span></button>
+    <div class="node-info" id="nodeInfo"></div>
+  </section>
+  <section class="frame-card" aria-label="当前帧的地址"><div class="frame-heading"><span id="frameTitle">等待封装</span></div><div class="frame-strip" id="frameStrip"><div class="field mac"><span id="dstMACLabel">目的 MAC</span><strong id="dstMAC">—</strong></div><div class="field mac"><span id="srcMACLabel">源 MAC</span><strong id="srcMAC">—</strong></div><div class="field ip"><span id="srcIPLabel">源 IP</span><strong id="srcIP">—</strong></div><div class="field ip"><span id="dstIPLabel">目的 IP</span><strong id="dstIP">—</strong></div></div></section>
+  <footer class="playback"><div class="transport"><button id="restartBtn" class="quiet" title="重新开始当前方向">↺ 重播</button><button id="prevBtn" class="quiet">上一步</button><button id="nextBtn" class="primary">下一步 →</button><button id="playBtn" class="play-button">▶ 连续播放</button></div><div class="playback-right"><button id="compareBtn" class="quiet">逐跳对照</button><select id="speed" aria-label="播放速度"><option value="0.65">慢速</option><option value="1" selected>正常速度</option><option value="1.7">快速</option></select><button id="returnBtn" class="return-button" disabled>↩ 发送回包</button></div></footer>
+  <div class="sr-only"><p id="eventDetail"></p><span id="stepNumber"></span><span id="eventCount"></span><span id="directionBadge"></span><span id="wifiBadge"></span><span id="cacheBadge"></span><span id="viewCaption"></span><span id="frameHint"></span><span id="payload"></span><span id="arpNote" hidden></span></div>
+</main>
+<dialog id="probeDialog"><div class="probe-detail">
+      <div class="probe-heading"><span class="radar-icon">◎</span><h2>探针捕获记录</h2><span id="listenLed" class="listen-led"></span><button id="probeClose" class="mini-close" data-close="probeDialog" aria-label="收起探针观察">×</button></div>
+      <div id="probeState" class="probe-state">等待 N1 无线帧</div>
+      <div class="observation"><div class="observation-title"><span>MAC</span><small>可读</small></div><dl><div><dt>源</dt><dd id="probeSrcMAC">—</dd></div><div><dt>目的</dt><dd id="probeDstMAC">—</dd></div></dl></div>
+      <div class="ip-observation"><span id="probeIPTitle">帧体内地址</span><small id="visibilityBadge">帧体已加密</small><div class="probe-ip-values"><span id="probeSrcIP">等待监听</span><span id="probeDstIP">等待监听</span></div></div>
+      <p class="probe-note" id="probeNote">无解密密钥 · 仅旁路监听</p>
+    </div></dialog>
+<dialog id="compareDialog"><div class="dialog-heading"><h2>逐跳地址对照</h2><button class="icon-close" data-close="compareDialog" aria-label="关闭">×</button></div><div class="table-scroll"><table><thead><tr><th>方向 / 链路</th><th>源 IP</th><th>目的 IP</th><th>源 MAC</th><th>目的 MAC</th></tr></thead><tbody id="comparisonBody"></tbody></table></div></dialog>
+
+<dialog id="settingsDialog" class="settings-dialog">
+  <form id="settingsForm">
+    <div class="dialog-heading"><div><span class="eyebrow">实验条件</span><h2>改变参数，重新观察</h2></div><button type="button" class="icon-close" data-close="settingsDialog" aria-label="关闭">×</button></div>
+    <div class="form-grid"><label>手机 A 的 IP<input name="phoneIP" inputmode="decimal" required spellcheck="false"></label><label>手机子网掩码<input name="mask" inputmode="decimal" required spellcheck="false"></label><label>默认网关 IP<input name="gatewayIP" inputmode="decimal" required spellcheck="false"></label><label>目的 IP<input name="destIP" inputmode="decimal" required spellcheck="false"></label></div>
+    <div class="switches"><label><span><b>加密 Wi-Fi</b><small>关闭后，探针可读取未加密帧体中的 IP</small></span><input type="checkbox" name="encrypted" role="switch"></label><label><span><b>使用随机 MAC</b><small>改变手机链路地址，不改变转发规则</small></span><input type="checkbox" name="randomMac" role="switch"></label><label><span><b>ARP 缓存预热</b><small>预存已知邻居映射；未知地址仍需询问</small></span><input type="checkbox" name="cacheWarm" role="switch"></label></div>
+    <details class="parameter-help"><summary>调参范围与固定拓扑</summary><p>收银终端为 192.168.1.20/24；R1 内侧为 192.168.1.1/24。N2 为 198.51.100.0/30；R2 外侧为 203.0.113.1/24；服务器为 203.0.113.10/24。其他设备和路由保持固定，仅修改手机配置与请求目的地址。</p><p>例如将目的 IP 改为 192.168.1.99，可观察 ARP 无人应答；将手机 IP 改为 192.168.2.88，可观察网关不可达。实际失败位置取决于掩码与路由。</p></details>
+    <div class="dialog-footer"><button type="button" id="defaultsBtn" class="quiet">恢复 PPT 条件</button><button type="submit" class="primary">应用并重置</button></div>
+  </form>
+</dialog>
+<dialog id="helpDialog" class="help-dialog">
+  <div class="dialog-heading"><h2>模型说明</h2><button class="icon-close" data-close="helpDialog" aria-label="关闭">×</button></div>
+  <p>先选择目的地址，再点击“下一步”或“连续播放”。去程交付完成后，点击“发送回包”。可暂停观察，也可打开“调参”验证错误配置。</p>
+  <h3>哪些内容做了简化？</h3><p>本模型按课件展示逻辑链路交付，不模拟 NAT、DNS、DHCP、拥塞或链路丢包。图中的网关包含接入功能；同一 Wi-Fi 内终端间的 AP 转发过程合并显示。</p><p>“四个地址”指两种 IP 与两种 MAC，并不是 802.11 的四个 MAC 地址字段。实际 Wi-Fi 帧还可能带有 BSSID / 收发接口等地址。ARP 不封装在 IP 数据报中，其 IP 字段表示发送方与目标协议地址。</p>
+  <h3>探针的观察条件</h3><p>假设探针位于覆盖范围内、监听相同信道且没有解密密钥。它能读取无线 MAC 首部；加密时不能读取帧体内的 IP 或 ARP 内容。开放 Wi-Fi 可暴露 IP，但不表示 HTTPS 应用内容也可读。探针不会阻断、转发或应答报文。</p><p>随机 MAC 开关仅比较链路标识，不模拟随机地址更换周期。缓存预热只影响已知邻居；回包可复用去程 ARP 学到的映射。封装动画省略部分控制字段，未计算 FCS；动画时长不代表真实网络时延。</p>
+  <h3>协议依据</h3><p><a href="https://www.rfc-editor.org/rfc/rfc826" target="_blank" rel="noopener">RFC 826 · ARP</a> · <a href="https://www.rfc-editor.org/rfc/rfc1812" target="_blank" rel="noopener">RFC 1812 · IPv4 路由</a> · <a href="https://wiki.wireshark.org/HowToDecrypt802.11" target="_blank" rel="noopener">Wireshark · 802.11 解密条件</a></p>
+</dialog>
+<script>/* IP/MAC classroom model: deterministic Ethernet-style link abstraction, no NAT. */
+(function (root, factory) {
+  'use strict';
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.IPMAC = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  const DEFAULTS = Object.freeze({
+    phoneIP: '192.168.1.88', mask: '255.255.255.0', gatewayIP: '192.168.1.1',
+    destIP: '203.0.113.10', cacheWarm: false, randomMac: true, encrypted: true,
+  });
+  const BROADCAST = 'FF-FF-FF-FF-FF-FF';
+  const ZERO_MAC = '00-00-00-00-00-00';
+  const LINKS = Object.freeze({ N1: ['phone', 'cash', 'r1'], N2: ['r1', 'r2'], N3: ['r2', 'server'] });
+
+  function parseIPv4(value) {
+    if (typeof value !== 'string' || !/^(0|[1-9]\d{0,2})(\.(0|[1-9]\d{0,2})){3}$/.test(value.trim())) return null;
+    const octets = value.trim().split('.').map(Number);
+    return octets.some(n => n > 255) ? null : octets.reduce((n, octet) => (n * 256 + octet) >>> 0, 0);
+  }
+
+  function maskPrefix(mask) {
+    const n = parseIPv4(mask);
+    if (n === null) return null;
+    const bits = n.toString(2).padStart(32, '0');
+    return /^1*0*$/.test(bits) ? bits.indexOf('0') === -1 ? 32 : bits.indexOf('0') : null;
+  }
+
+  function sameSubnet(a, b, mask) {
+    const av = parseIPv4(a), bv = parseIPv4(b), mv = parseIPv4(mask);
+    return av !== null && bv !== null && mv !== null && ((av & mv) >>> 0) === ((bv & mv) >>> 0);
+  }
+
+  function usableUnicast(ip) {
+    const n = parseIPv4(ip);
+    if (n === null) return false;
+    const first = n >>> 24;
+    return first !== 0 && first !== 127 && first < 224;
+  }
+
+  function subnetBoundary(ip, mask) {
+    const n = parseIPv4(ip), m = parseIPv4(mask);
+    if (n === null || m === null) return false;
+    const host = (n & ~m) >>> 0;
+    return host === 0 || host === (~m >>> 0);
+  }
+
+  function createNodes(config) {
+    const iface = (ip, mac, mask = '255.255.255.0') => ({ ip, mac, mask });
+    const make = (label, interfaces, router = false) => {
+      const first = Object.values(interfaces)[0];
+      return { label, ip: first.ip, mac: first.mac, interfaces, router };
+    };
+    return {
+      phone: make('手机 A', { N1: iface(config.phoneIP, config.randomMac ? '5E-1F-08-93-C2-7D' : '00-7A-FF-DA-C7-48', config.mask) }),
+      cash: make('收银终端', { N1: iface('192.168.1.20', '02-00-00-01-00-20') }),
+      r1: make('网关 R1', {
+        N1: iface('192.168.1.1', '1C-1D-86-22-0B-01'),
+        N2: iface('198.51.100.1', '02-00-00-02-01-01', '255.255.255.252'),
+      }, true),
+      r2: make('路由器 R2', {
+        N2: iface('198.51.100.2', '02-00-00-02-02-01', '255.255.255.252'),
+        N3: iface('203.0.113.1', '02-00-00-03-02-01'),
+      }, true),
+      server: make('外地服务器', { N3: iface('203.0.113.10', '02-00-00-03-00-10') }),
+      probe: { label: '探针盒子', ip: null, mac: null, interfaces: {}, router: false },
+    };
+  }
+
+  function validate(config, nodes) {
+    const errors = [];
+    for (const [key, name] of [['phoneIP', '手机 IP'], ['gatewayIP', '网关 IP'], ['destIP', '目的 IP']]) {
+      if (parseIPv4(config[key]) === null) errors.push(`${name} 格式错误：每段须为 0—255 的十进制整数。`);
+      else if (!usableUnicast(config[key])) errors.push(`${name} 须为有效的单播 IPv4 地址。`);
+    }
+    const prefix = maskPrefix(config.mask);
+    if (prefix === null) errors.push('子网掩码须由连续的 1 和连续的 0 构成。');
+    else if (prefix < 1 || prefix > 30) errors.push('此共享链路模型支持 /1—/30 掩码；/31、/32 不适用于这里的广播 LAN。');
+    else if (parseIPv4(config.phoneIP) !== null && subnetBoundary(config.phoneIP, config.mask)) errors.push('手机 IP 不能是本机子网的网络地址或广播地址。');
+    const fixed = Object.entries(nodes).filter(([id]) => id !== 'phone').flatMap(([, node]) => Object.values(node.interfaces));
+    if (fixed.some(i => i.ip === config.phoneIP)) errors.push('手机 IP 与拓扑中已有接口重复，请使用不同地址。');
+    if (usableUnicast(config.destIP)) {
+      if (prefix !== null && prefix >= 1 && prefix <= 30
+          && sameSubnet(config.phoneIP, config.destIP, config.mask)
+          && subnetBoundary(config.destIP, config.mask)) {
+        errors.push('目的 IP 是手机所在子网的网络地址或广播地址；本模型演示单播数据。');
+      }
+      for (const network of [
+        { ip: '192.168.1.1', mask: '255.255.255.0' },
+        { ip: '198.51.100.1', mask: '255.255.255.252' },
+        { ip: '203.0.113.1', mask: '255.255.255.0' },
+      ]) {
+        if (sameSubnet(config.destIP, network.ip, network.mask) && subnetBoundary(config.destIP, network.mask)) {
+          errors.push('目的 IP 是拓扑中该子网的网络地址或广播地址；本模型演示单播数据。');
+          break;
+        }
+      }
+    }
+    return errors;
+  }
+
+  function buildSimulation(input = {}) {
+    const config = { ...DEFAULTS, ...input };
+    for (const key of ['phoneIP', 'mask', 'gatewayIP', 'destIP']) config[key] = String(config[key] ?? '').trim();
+    for (const key of ['cacheWarm', 'randomMac', 'encrypted']) config[key] = Boolean(config[key]);
+    const nodes = createNodes(config);
+    const errors = validate(config, nodes);
+    let serial = 0;
+    const event = (kind, title, detail, fields = {}) => ({
+      id: `event-${++serial}`, kind, title, detail, from: null, to: null, link: null,
+      stage: 0, frame: null, ...fields,
+    });
+    if (errors.length) {
+      return { config, nodes, events: [event('error', '请检查参数', errors[0], { stage: 5 })],
+        returnEvents: [], success: false, returnSuccess: false, summary: errors[0], returnSummary: '', errors };
+    }
+
+    const cache = new Map();
+    const cacheFor = (id, link) => {
+      const key = `${id}/${link}`;
+      if (!cache.has(key)) cache.set(key, new Map());
+      return cache.get(key);
+    };
+    if (config.cacheWarm) {
+      for (const [link, ids] of Object.entries(LINKS)) {
+        for (const id of ids) {
+          for (const other of ids.filter(i => i !== id)) {
+            const peer = nodes[other].interfaces[link];
+            cacheFor(id, link).set(peer.ip, peer.mac);
+          }
+        }
+      }
+    }
+
+    const probeView = (link, frame) => link === 'N1' ? {
+      visible: true, srcMAC: frame.srcMAC, dstMAC: frame.dstMAC,
+      srcIP: config.encrypted ? null : frame.srcIP,
+      dstIP: config.encrypted ? null : frame.dstIP,
+      encrypted: config.encrypted,
+    } : { visible: false, encrypted: config.encrypted };
+
+    function route(id, destIP) {
+      const node = nodes[id];
+      for (const [link, intf] of Object.entries(node.interfaces)) {
+        if (intf.ip === destIP) return { local: true, link, nextIP: destIP, direct: true };
+      }
+      for (const [link, intf] of Object.entries(node.interfaces)) {
+        if (sameSubnet(intf.ip, destIP, intf.mask)) return { link, nextIP: destIP, direct: true };
+      }
+      if (id === 'phone') return { link: 'N1', nextIP: config.gatewayIP, direct: false };
+      if (id === 'cash') return { link: 'N1', nextIP: '192.168.1.1', direct: false };
+      if (id === 'server') return { link: 'N3', nextIP: '203.0.113.1', direct: false };
+      if (id === 'r1' && sameSubnet(destIP, '203.0.113.1', '255.255.255.0')) return { link: 'N2', nextIP: '198.51.100.2', direct: false };
+      if (id === 'r2' && sameSubnet(destIP, '192.168.1.1', '255.255.255.0')) return { link: 'N2', nextIP: '198.51.100.1', direct: false };
+      return null;
+    }
+
+    function transfer(start, packet, direction) {
+      const events = [];
+      const add = (kind, title, detail, fields) => events.push(event(kind, title, detail, { direction, ...fields }));
+      const fail = (title, detail, fields) => {
+        add('error', title, detail, { stage: 5, ...fields });
+        return { events, success: false, recipient: null, summary: detail };
+      };
+      let current = start;
+      const visited = new Set();
+      for (let hop = 1; hop <= 8; hop += 1) {
+        const node = nodes[current];
+        const selected = route(current, packet.dstIP);
+        if (selected?.local) {
+          add('deliver', direction === 'return' ? '回包已收到' : '数据已到达', `${node.label} 接收目的 IP 为 ${packet.dstIP} 的数据。`, { from: current, to: current, stage: 5, hop: hop - 1 });
+          return { events, success: true, recipient: current, summary: `${node.label} 已收到数据。` };
+        }
+        if (visited.has(current)) return fail('检测到转发环路', '本次路径重复经过同一设备，停止转发。', { from: current });
+        visited.add(current);
+        if (!selected) return fail('没有匹配路由', `${node.label} 没有到 ${packet.dstIP} 所在网络的路由。`, { from: current });
+        const { link, nextIP, direct } = selected;
+        const out = node.interfaces[link];
+        const intended = LINKS[link].find(id => id !== current && nodes[id].interfaces[link].ip === nextIP);
+        const nextName = intended ? nodes[intended].label : nextIP;
+        add('decision', direct ? '目的地址在直连网段' : '目的地址在其他网段', node.router
+          ? `${node.label} 按目的 IP ${packet.dstIP} 查路由表。`
+          : `${packet.dstIP} 与本机 ${out.ip} 按掩码 ${out.mask} 比较：${direct ? '同网段' : '跨网段'}。`,
+        { from: current, to: intended || null, link, stage: 0, hop });
+        add('decision', `下一跳：${nextName}`, direct ? `直接交付，解析目的主机 ${nextIP} 的 MAC。`
+          : `交给 ${nextIP} 转发；目的 IP 仍是 ${packet.dstIP}。`,
+        { from: current, to: intended || null, link, stage: 1, hop });
+        if (!sameSubnet(out.ip, nextIP, out.mask)) return fail('下一跳不在本机网段', `下一跳 ${nextIP} 与 ${out.ip} /${maskPrefix(out.mask)} 不在同一网段，无法按此配置交付。`, { from: current, link, hop });
+        if (nextIP === out.ip) return fail('网关不能指向本机', '配置的下一跳是本机，无法转交到其他网络。', { from: current, link, hop });
+        const ownCache = cacheFor(current, link);
+        let nextMAC = ownCache.get(nextIP);
+        if (!nextMAC) {
+          add('cache', 'ARP 缓存未命中', `缓存中没有 ${nextIP} 对应的 MAC。`, { from: current, to: intended || null, link, stage: 2, hop });
+          const request = {
+            protocol: 'ARP', operation: 'request', srcIP: out.ip, dstIP: nextIP,
+            srcMAC: out.mac, dstMAC: BROADCAST, arpTargetIP: nextIP, arpTargetMAC: ZERO_MAC,
+          };
+          add('arp-request', `广播询问：谁是 ${nextIP}？`, '请求只在当前链路传播，路由器不转发这份广播。', {
+            from: current, to: intended || null, link, stage: 2, frame: request, hop,
+            broadcastTargets: [...LINKS[link].filter(id => id !== current), ...(link === 'N1' ? ['probe'] : [])],
+            probe: probeView(link, request),
+          });
+          if (!intended) return fail('ARP 无人应答', `${link} 上没有 IP 为 ${nextIP} 的接口，等待超时，数据尚未发出。`, { from: current, link, hop });
+          const peer = nodes[intended].interfaces[link];
+          // The addressed receiver learns the request sender; bystanders are not assumed to cache it.
+          cacheFor(intended, link).set(out.ip, out.mac);
+          const reply = {
+            protocol: 'ARP', operation: 'reply', srcIP: peer.ip, dstIP: out.ip,
+            srcMAC: peer.mac, dstMAC: out.mac, arpTargetIP: out.ip, arpTargetMAC: out.mac,
+          };
+          add('arp-reply', `${nodes[intended].label} 单播应答`, `我是 ${peer.ip}，我的 MAC 是 ${peer.mac}。`, {
+            from: intended, to: current, link, stage: 2, frame: reply, hop, probe: probeView(link, reply),
+          });
+          ownCache.set(peer.ip, peer.mac);
+          nextMAC = peer.mac;
+          add('cache', '写入 ARP 缓存', `${nextIP} → ${nextMAC}；应答方也已从请求中获知发送方 MAC。`, { from: current, to: intended, link, stage: 2, hop });
+        } else {
+          add('cache', 'ARP 缓存命中', `${nextIP} → ${nextMAC}，直接使用，无需再次广播。`, { from: current, to: intended || null, link, stage: 2, hop });
+        }
+        if (!intended) return fail('下一跳不可达', '缓存中的接口在此链路不存在，无法交付。', { from: current, link, hop });
+        const frame = { protocol: 'IPv4', srcIP: packet.srcIP, dstIP: packet.dstIP, srcMAC: out.mac, dstMAC: nextMAC };
+        add('encapsulate', `第 ${hop} 跳：封装数据帧`, '源 MAC 取发送接口，目的 MAC 取下一跳接口；两个 IP 标识通信两端。', { from: current, to: intended, link, stage: 3, frame: { ...frame }, hop });
+        add('data', `${node.label} → ${nodes[intended].label}`, `${link} 上按目的 MAC 交付，IP 数据报被装在帧内。`, { from: current, to: intended, link, stage: 4, frame: { ...frame }, hop, probe: probeView(link, frame) });
+        const receiver = nodes[intended];
+        const isFinal = Object.values(receiver.interfaces).some(i => i.ip === packet.dstIP);
+        if (isFinal) {
+          add('deliver', direction === 'return' ? '回包已收到' : '数据已到达', `${receiver.label} 接收目的 IP 为 ${packet.dstIP} 的数据。`, { from: current, to: intended, link, stage: 5, frame: { ...frame }, hop });
+          return { events, success: true, recipient: intended, summary: `${receiver.label} 已收到数据。` };
+        }
+        if (!receiver.router) return fail('接收设备不负责转发', `${receiver.label} 收到帧，但 IP 数据报的目的地址不是自己；它不是路由器。`, { from: intended, link, hop, frame: { ...frame } });
+        add('decapsulate', `${receiver.label} 拆除旧帧`, '保留 IP 数据报，下一跳重新封装 MAC 帧。', { from: intended, to: intended, link, stage: 4, frame: { ...frame }, hop });
+        current = intended;
+      }
+      return fail('超过演示跳数', '转发未能在限定跳数内完成。', { from: current });
+    }
+
+    const outbound = transfer('phone', { srcIP: config.phoneIP, dstIP: config.destIP }, 'outbound');
+    const reply = outbound.success
+      ? transfer(outbound.recipient, { srcIP: config.destIP, dstIP: config.phoneIP }, 'return')
+      : { events: [], success: false, summary: '' };
+    return {
+      config, nodes, events: outbound.events, returnEvents: reply.events,
+      success: outbound.success, returnSuccess: reply.success,
+      summary: outbound.summary, returnSummary: reply.summary, errors,
+    };
+  }
+
+  return Object.freeze({ DEFAULTS, buildSimulation, parseIPv4, maskPrefix, sameSubnet });
+});
+</script><script>/* A shared radio medium: waves reach all N1 devices, MAC decides acceptance. */
+(() => {
+  'use strict';
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const icons = {
+    phone:'<rect x="-23" y="-43" width="46" height="86" rx="9" fill="#0A2463"/><rect x="-18" y="-35" width="36" height="65" rx="4" fill="#f4f8ff"/><rect x="-8" y="-39" width="16" height="3" rx="2" fill="#8eaddd"/><path d="M-12 -8Q0 -20 12 -8M-8 -2Q0 -10 8 -2M-4 4Q0 0 4 4" stroke="#4b83eb" fill="none" stroke-width="2.5" stroke-linecap="round"/><circle cy="10" r="2" fill="#4b83eb"/><path d="M-6 36H6" stroke="#a2bbed" stroke-width="2"/>',
+    cash:'<path d="M0 15V35M-28 37H28" stroke="#61788d" stroke-width="7" stroke-linecap="round"/><rect x="-38" y="-31" width="76" height="50" rx="5" fill="#087d8d"/><rect x="-32" y="-25" width="64" height="36" rx="2" fill="#edfbfb"/><path d="M-24 -17H15M-24 -10H2" stroke="#bddfe3" stroke-width="3"/>',
+    router:'<path d="M-43 -16V19C-43 40 43 40 43 19V-16" fill="url(#routerGradient)" stroke="white" stroke-width="2.5"/><ellipse cy="-16" rx="43" ry="14" fill="#78a2f1" stroke="white" stroke-width="2.5"/><path d="M-25 -19H18l-7 -5M25 -11H-18l7 5" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>',
+    server:'<rect x="-28" y="-43" width="56" height="86" rx="7" fill="url(#routerGradient)" stroke="white" stroke-width="2.5"/><g fill="#6b9af1" stroke="#bbd1fa"><rect x="-20" y="-33" width="40" height="18" rx="3"/><rect x="-20" y="-9" width="40" height="18" rx="3"/><rect x="-20" y="15" width="40" height="18" rx="3"/></g><g fill="#bcffe9"><circle cx="-12" cy="-24" r="2.5"/><circle cx="-12" r="2.5"/><circle cx="-12" cy="24" r="2.5"/></g><path d="M-2 -24H12M-2 0H12M-2 24H12" stroke="#d0e2ff" stroke-width="2"/>',
+    probe:'<path d="M-22 -22V-54" stroke="#e6aa42" stroke-width="3"/><circle cx="-22" cy="-56" r="4" fill="#f1b84f"/><rect x="-41" y="-22" width="82" height="49" rx="11" fill="url(#probeGradient)" stroke="#e8ad49" stroke-width="2"/><circle cx="-27" cy="0" r="3.5" fill="#ff7668"/><path d="M-13 0H27" stroke="#8e9fbc" stroke-width="3"/><path d="M-25 31H-16M16 31H25" stroke="#536886" stroke-width="3"/>'
+  };
+  class Scene {
+    constructor(host,onNode){this.host=host;this.onNode=onNode;this.view='global';this.event=null;this.progress=0;}
+    setSimulation(sim){this.sim=sim;this.event=null;this.render();}
+    render(){
+      this.small=innerWidth<=760;
+      this.pos=this.small?{phone:{x:155,y:185},cash:{x:480,y:185},probe:{x:485,y:520},r1:{x:155,y:520},r2:{x:155,y:855},server:{x:490,y:855}}:{phone:{x:230,y:305},cash:{x:505,y:170},probe:{x:510,y:430},r1:{x:820,y:305},r2:{x:1160,y:305},server:{x:1460,y:305}};
+      const zone=this.small?'<rect x="35" y="50" width="610" height="630" rx="125"/>':'<ellipse cx="480" cy="307" rx="455" ry="253"/>';
+      const title=this.small?'<text x="112" y="100">N1 · 商场 Wi-Fi</text>':'<text x="210" y="103">N1 · 商场 Wi-Fi</text>';
+      const wiring=this.small?'<g data-link="N2"><path d="M155 555V828"/><text x="177" y="737">N2</text></g><g data-link="N3"><path d="M190 855H460"/><text x="330" y="825">N3</text></g>':'<g data-link="N2"><path d="M855 305H1125"/><text x="990" y="272">N2</text></g><g data-link="N3"><path d="M1195 305H1430"/><text x="1310" y="272">N3</text></g>';
+      this.host.innerHTML=`<svg viewBox="0 0 ${this.small?'700 940':'1600 620'}" role="img" aria-label="N1 共享无线覆盖区，与 N2、N3 外部链路"><defs><linearGradient id="routerGradient"><stop stop-color="#4385FA"/><stop offset="1" stop-color="#0545B7"/></linearGradient><linearGradient id="probeGradient" x2="0" y2="1"><stop stop-color="#344b73"/><stop offset="1" stop-color="#152b50"/></linearGradient><radialGradient id="coverageGradient"><stop stop-color="#edf4ff" stop-opacity=".72"/><stop offset=".78" stop-color="#eaf2ff" stop-opacity=".84"/><stop offset="1" stop-color="#d9e8ff" stop-opacity=".76"/></radialGradient><filter id="deviceShadow" x="-70%" y="-70%" width="240%" height="240%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#214778" flood-opacity=".16"/></filter><clipPath id="coverageClip">${zone}</clipPath></defs><g id="cameraGroup"><g class="wireless-zone" fill="url(#coverageGradient)" stroke="#C0D6FD" stroke-width="1.2">${zone}</g><g class="zone-title" fill="#0545B7" font-size="21" letter-spacing="1">${title}</g><g class="wired-links" fill="none" stroke="#b8c9e1" stroke-width="2.5">${wiring}</g><g id="motionTrails"></g><g id="waveLayer" clip-path="url(#coverageClip)"></g>${Object.entries(this.pos).map(([id,p])=>this.node(id,p)).join('')}<g id="motionPackets"></g></g></svg>`;
+      this.host.querySelectorAll('[data-node]').forEach(el=>{el.addEventListener('click',()=>this.onNode(el.dataset.node));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();this.onNode(el.dataset.node);}});});
+      this.host.querySelector('.wireless-zone').setAttribute('data-link','N1');this.applyCamera();this.setEvent(this.event,true);
+    }
+    node(id,p){
+      const labels={phone:'手机 A',cash:'收银终端',probe:'探针盒子',r1:'网关 R1',r2:'路由器 R2',server:'外地服务器'};
+      const address=id==='probe'?'':this.sim.nodes[id].ip;
+      return `<g class="device" data-node="${id}" role="button" tabindex="0" aria-label="查看${labels[id]}地址" transform="translate(${p.x} ${p.y})"><ellipse class="device-ground" cy="43" rx="49" ry="9" fill="#1c4c8c" opacity=".05"/><circle class="receive-ring" r="56" fill="none" stroke="#3477dd" stroke-width="2" opacity="0"/><g filter="url(#deviceShadow)">${icons[id]||icons.router}</g><text class="node-label" text-anchor="middle" y="75" font-size="23" font-weight="bold" fill="${id==='probe'?'#D2660F':'#1D2B4F'}">${labels[id]}</text><text class="node-address" text-anchor="middle" y="101" font-size="18" fill="#1D2B4F">${esc(address)}</text><g class="node-badge" opacity="0"><rect x="-59" y="-88" width="118" height="25" rx="12.5" fill="${id==='probe'?'#fff0d5':'#e5efff'}"/><text text-anchor="middle" y="-70" font-size="16" fill="${id==='probe'?'#a56b19':'#3472ca'}"></text></g></g>`;
+    }
+    setEvent(event,resize=false){
+      this.event=event;this.progress=resize?this.progress:0;this.paths=[];this.captureAt=Infinity;
+      this.host.querySelector('#motionTrails').innerHTML='';this.host.querySelector('#motionPackets').innerHTML='';this.host.querySelector('#waveLayer').innerHTML='';
+      this.host.dataset.view='global';this.host.dataset.activeLink=event?.link||'';this.host.dataset.protocol=event?.frame?.protocol||'';
+      this.host.querySelectorAll('[data-link]').forEach(el=>{el.classList.toggle('link-active',event?.link===el.dataset.link);el.classList.toggle('link-muted',!!event&&event.link!==el.dataset.link);});
+      this.host.querySelectorAll('.device').forEach(el=>{const active=event?.from===el.dataset.node||event?.to===el.dataset.node;el.querySelector('.receive-ring').setAttribute('opacity',active?'.7':'0');el.querySelector('.node-badge').setAttribute('opacity','0');el.classList.toggle('device-active',active);el.classList.toggle('device-muted',!!event&&!active);});
+      if(event?.kind==='encapsulate'){
+        this.host.querySelector('#motionPackets').innerHTML=this.packet('ready',event.from,'#1F5FD1');this.draw(this.progress);return;
+      }
+      if(!event||!['arp-request','arp-reply','data'].includes(event.kind)){this.applyCamera();return;}
+      this.transmission=event;const source=this.pos[event.from];
+      this.txStart=event.kind.startsWith('arp-')?.5:0;
+      const packetColor=event.frame?.protocol==='ARP'?'#12976B':'#1F5FD1';
+      let packets=this.txStart?this.packet('ready',event.from,packetColor):'';
+      if(event.link==='N1'){
+        this.maxRadius=Math.max(...['phone','cash','r1','probe'].map(id=>Math.hypot(this.pos[id].x-source.x,this.pos[id].y-source.y)))+80;
+        this.host.querySelector('#waveLayer').innerHTML=[0,1,2,3].map(i=>`<circle data-wireless-wave="${i}" cx="${source.x}" cy="${source.y}" r="0" fill="none" stroke="${event.kind.startsWith('arp')?'#12976B':'#1F5FD1'}" stroke-width="${i===0?2.7:1.8}" opacity="0"/>`).join('');
+        this.captureAt=this.txStart+(1-this.txStart)*this.arrivalAt('probe');
+        const recipients=event.kind==='arp-request'?['phone','cash','r1'].filter(id=>id!==event.from):[event.to].filter(id=>this.pos[id]);
+        packets+=this.packet('emission',event.from,packetColor)+recipients.map(id=>this.packet('arrival',id,packetColor)).join('')+this.packet('listen','probe','#E69A00');
+        this.host.querySelector('#motionPackets').innerHTML=packets;
+      }else{
+        const recipients=(event.kind==='arp-request'?event.broadcastTargets||[]:[event.to]).filter(id=>id!==event.from&&this.pos[id]&&id!=='probe');
+        this.host.querySelector('#motionTrails').innerHTML=recipients.map(id=>`<path data-target="${id}" d="M${source.x} ${source.y} L${this.pos[id].x} ${this.pos[id].y}" fill="none" stroke="${packetColor}" stroke-width="3" opacity=".6"/>`).join('');
+        packets+=recipients.map(id=>this.packet('transit',id,packetColor)).join('');this.host.querySelector('#motionPackets').innerHTML=packets;
+        this.paths=recipients.map(id=>{const track=this.host.querySelector(`#motionTrails [data-target="${id}"]`);return{track,length:track.getTotalLength(),packet:this.host.querySelector(`[data-packet-role="transit"][data-device="${id}"]`)};});
+      }
+      this.draw(this.progress);
+    }
+    applyCamera(){
+      const g=this.host.querySelector('#cameraGroup');if(!g)return;
+      this.host.querySelector('svg').setAttribute('viewBox',this.small?'0 0 700 1000':'0 0 1600 620');
+      this.host.querySelector('svg').setAttribute('preserveAspectRatio','xMidYMid meet');g.setAttribute('transform','translate(0 0) scale(1)');
+    }
+    draw(progress){
+      this.progress=progress;
+      const ready=this.host.querySelector('[data-packet-role="ready"]');
+      if(ready){const phase=this.event.kind==='encapsulate'?progress:Math.min(progress/.5,1);const p=this.pos[this.event.from];const opacity=Math.max(0,Math.min(1,(phase-.80)/.16))*(this.event.kind==='encapsulate'||progress<.5?1:0);ready.setAttribute('transform',`translate(${p.x} ${p.y-48}) scale(${.7+.3*opacity})`);ready.setAttribute('opacity',String(opacity));}
+      const e=this.event;if(!e||!['arp-request','arp-reply','data'].includes(e.kind))return;
+      const source=this.pos[e.from];
+      const q=Math.max(0,Math.min(1,(progress-this.txStart)/(1-this.txStart)));
+      if(e.link==='N1'){
+        this.host.querySelectorAll('[data-wireless-wave]').forEach((circle,i)=>{
+          const life=(q-.12-i*.06)/.65;const active=life>0&&life<1;const ending=q<.86?1:Math.max(0,(1-q)/.14);circle.setAttribute('r',String(Math.max(0,Math.min(life,1))*this.maxRadius));circle.setAttribute('opacity',active?String(.65*Math.sin(Math.PI*life)**.5*ending):'0');
+        });
+        const emission=this.host.querySelector('[data-packet-role="emission"]');const emitting=progress>=this.txStart&&q<.27;const lift=Math.min(1,q/.27);emission.setAttribute('transform',`translate(${source.x} ${source.y-48-38*lift}) scale(${1-.35*lift})`);emission.setAttribute('opacity',emitting?String(Math.max(0,1-Math.max(0,q-.12)/.15)):'0');
+        this.host.querySelectorAll('[data-packet-role="arrival"],[data-packet-role="listen"]').forEach(packet=>{const id=packet.dataset.device,p=this.pos[id],arrival=this.arrivalAt(id);const local=Math.max(0,Math.min(1,(q-arrival)/.21));const visible=q>=arrival&&q<arrival+.21;packet.setAttribute('transform',`translate(${p.x} ${p.y-83+35*local}) scale(${.75+.25*Math.sin(Math.PI*local)})`);packet.setAttribute('opacity',visible?String((id==='probe'?.55:1)*Math.sin(Math.PI*local)):'0');});
+        for(const id of ['phone','cash','r1','probe']){if(id===e.from||q<this.arrivalAt(id))continue;
+          const target=id===e.to;
+          if(id==='probe'||target)this.host.querySelector(`[data-node="${id}"]`).classList.remove('device-muted');
+          const ring=this.host.querySelector(`[data-node="${id}"] .receive-ring`);ring.setAttribute('opacity',id==='probe'?'.5':target?'.7':'.15');ring.setAttribute('stroke',id==='probe'?'#dca03a':target?'#4287df':'#8da8cf');
+        }
+      }else{
+        this.paths.forEach(p=>{const motion=Math.min(Math.max((q-.07)/.8,0),1);const point=p.track.getPointAtLength(p.length*motion);p.packet.setAttribute('transform',`translate(${point.x} ${point.y})`);p.packet.setAttribute('opacity',progress>=this.txStart&&q<.94?'1':'0');});
+      }
+    }
+    arrivalAt(id){const source=this.pos[this.event.from],p=this.pos[id];return .12+Math.hypot(source.x-p.x,source.y-p.y)/this.maxRadius*.65;}
+    packet(role,id,color){return `<g class="packet" data-packet-role="${role}" data-device="${id}" opacity="0"><rect x="-22" y="-14" width="44" height="28" rx="6" fill="${color}" stroke="#D2660F" stroke-width="2"/><path d="M-12 -5H12M-12 3H5" stroke="white" stroke-width="2.5"/></g>`;}
+    anchor(){const svg=this.host.querySelector('svg'),g=this.host.querySelector('#cameraGroup');if(!svg||!g)return null;const p=svg.createSVGPoint();p.x=this.pos.probe.x;p.y=this.pos.probe.y+111;const out=p.matrixTransform(g.getScreenCTM());const host=this.host.getBoundingClientRect();return{x:out.x-host.left,y:out.y-host.top};}
+  }
+  window.IPMACScene=Scene;
+})();
+
+</script><script>/* Field-only frame assembly beside the active device; addresses stay in the footer. */
+(() => {
+  const clamp=n=>Math.max(0,Math.min(1,n));
+  const ease=n=>{n=clamp(n);return n*n*(3-2*n);};
+  class FrameAssembly {
+    constructor(scene){
+      this.scene=scene;this.host=scene.host.parentElement;
+      this.el=document.createElement('div');this.el.id='frameAssembly';this.el.className='assembly-panel';this.el.hidden=true;
+      this.el.innerHTML='<div class="assembly-shell"><div class="assembly-mac"><span data-part="dstMAC">目的 MAC</span><span data-part="srcMAC">源 MAC</span></div><div class="assembly-core"><span data-part="srcIP">源 IP</span><span data-part="dstIP">目的 IP</span><span class="assembly-data" data-part="data">数据</span></div></div>';
+      this.host.append(this.el);this.mac=this.el.querySelector('.assembly-mac');this.core=this.el.querySelector('.assembly-core');this.shell=this.el.querySelector('.assembly-shell');
+    }
+    setEvent(event){
+      this.event=event;this.mode=event?.kind==='encapsulate'?'encapsulate':event?.kind==='decapsulate'?'decapsulate':event?.kind?.startsWith('arp-')?'arp':null;
+      this.el.hidden=!this.mode;this.el.dataset.mode=this.mode||'';this.el.dataset.device=event?.from||'';
+      if(!this.mode)return;
+      this.core.innerHTML=this.mode==='arp'?`<span class="assembly-arp" data-part="arp">ARP ${event.kind==='arp-request'?'请求':'应答'}</span>`:'<span data-part="srcIP">源 IP</span><span data-part="dstIP">目的 IP</span><span class="assembly-data" data-part="data">数据</span>';
+      this.position();this.draw(0);
+    }
+    position(){
+      if(!this.mode)return;
+      const source=this.scene.host.querySelector(`[data-node="${this.event.from}"]`);if(!source)return;
+      const host=this.host.getBoundingClientRect();const svg=this.scene.host.querySelector('svg');const pt=svg.createSVGPoint();const center=pt.matrixTransform(source.getScreenCTM());
+      this.el.style.width=Math.min(innerWidth<=760?340:360,host.width-24)+'px';
+      const width=this.el.offsetWidth,height=this.el.offsetHeight;
+      // Candidate spaces are scored against all device labels and icons, not just the sender.
+      const obstacles=[...this.scene.host.querySelectorAll('[data-node],.zone-title')].map(el=>{const r=el.getBoundingClientRect();return{x:r.x-host.x-8,y:r.y-host.y-8,w:r.width+16,h:r.height+16};});
+      const cx=center.x-host.x,cy=center.y-host.y;
+      const candidates=[{x:cx-width/2,y:cy-height-65},{x:cx-width/2,y:cy+118},{x:cx+70,y:cy-height/2},{x:cx-width-70,y:cy-height/2},{x:cx-width/2,y:cy-height-150},{x:cx-width/2,y:cy+175}].flatMap(p=>[-16,0,16].map(dy=>({x:p.x,y:p.y+dy})));
+      let best=null;
+      for(const candidate of candidates){const x=Math.max(12,Math.min(candidate.x,host.width-width-12));const y=Math.max(48,Math.min(candidate.y,host.height-height-12));const overlap=obstacles.reduce((sum,r)=>sum+Math.max(0,Math.min(x+width,r.x+r.w)-Math.max(x,r.x))*Math.max(0,Math.min(y+height,r.y+r.h)-Math.max(y,r.y)),0);const score=overlap*100+Math.hypot(x+width/2-cx,y+height/2-cy);if(!best||score<best.score)best={x,y,score};}
+      this.el.style.left=best.x+'px';this.el.style.top=best.y+'px';
+      this.el.style.transformOrigin=`${cx-best.x}px ${cy-48-best.y}px`;
+    }
+    draw(progress){
+      if(!this.mode)return;
+      const p=this.mode==='arp'?clamp(progress/.5):progress;
+      const removing=this.mode==='decapsulate';
+      let coreOpacity,macOpacity,macX,coreX,scale=1,panelOpacity=1;
+      if(removing){
+        const peel=ease((p-.18)/.5);coreOpacity=1;macOpacity=1-peel;macX=-60*peel;coreX=-this.mac.offsetWidth/2*peel;
+        this.shell.style.borderColor=`rgba(210,102,15,${1-peel})`;
+        this.el.dataset.phase=p<.2?'old-frame':p<.72?'remove-mac':'retain-ip';
+      }else{
+        coreOpacity=ease((p-.04)/.2);const join=ease((p-.32)/.24);macOpacity=join;macX=-45*(1-join);coreX=-(this.mac.offsetWidth/2)*(1-join);
+        const fold=ease((p-.79)/.21);scale=1-.90*fold;panelOpacity=1-fold;
+        this.shell.style.borderColor=`rgba(210,102,15,${join})`;
+        this.el.dataset.phase=p<.3?'payload':p<.56?'add-mac':p<.79?'complete':'fold';
+      }
+      this.core.style.opacity=String(coreOpacity);this.core.style.transform=`translate(${coreX}px,${(1-coreOpacity)*15}px)`;
+      this.mac.style.opacity=String(macOpacity);this.mac.style.transform=`translate(${macX}px,0)`;
+      this.el.style.opacity=String(panelOpacity);this.el.style.transform=`scale(${scale})`;
+      this.shell.style.background=removing&&p>.72?'transparent':'#ffffffed';this.shell.style.boxShadow=removing&&p>.72?'none':'';
+      this.el.setAttribute('aria-hidden',String(panelOpacity<.02));
+    }
+  }
+  window.IPMACAssembly=FrameAssembly;
+})();
+</script><script>/* Deterministic protocol events drive both the teaching display and the animation. */
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let simulation, events = [], direction = 'outbound', index = -1, elapsed = 0, animating = false, auto = false, lastTime = 0, captured = false;
+  let config = {...IPMAC.DEFAULTS};
+  let selectedNode = null;
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mobile = () => innerWidth <= 760;
+  const scene=new IPMACScene($('network'), id=>{selectedNode=id;showNodeInfo();if(id==='probe')openProbe();});
+  const assembly=new IPMACAssembly(scene);
+  let popupDismissed=false;
+  function drawNetwork(){scene.setSimulation(simulation);if(index>=0)scene.setEvent(events[index]);showNodeInfo();}
+  function showNodeInfo(){
+    if(!selectedNode){$('nodeInfo').textContent='';return;}
+    if(selectedNode==='probe'){$('nodeInfo').textContent='';return;}
+    const n=simulation.nodes[selectedNode];$('nodeInfo').textContent=n.label+'：'+Object.values(n.interfaces).map(i=>i.ip+' · '+i.mac).join(' / ');
+  }
+  function positionProbe(){const p=scene.anchor();if(!p)return;const card=$('probeToast'),host=$('network').parentElement;const width=card.offsetWidth||235;const x=Math.min(Math.max(10,p.x+$('network').offsetLeft-width/2),host.clientWidth-width-10);const y=Math.min(p.y+$('network').offsetTop+10,host.clientHeight-card.offsetHeight-12);card.style.left=x+'px';card.style.top=Math.max(50,y)+'px';}
+  function setProbeVisible(show){const card=$('probeToast');card.classList.toggle('visible',show);card.setAttribute('aria-hidden',String(!show));card.tabIndex=show?0:-1;if(show)positionProbe();}
+  function openProbe(){animating=false;auto=false;updateButtons();$('probeDialog').showModal();}
+  function setupPaths(event){scene.setEvent(event);assembly.setEvent(event);setProbeVisible(false);}
+  function drawMotion(progress){scene.draw(progress);assembly.draw(progress);syncAssemblyFields(progress);positionProbe();}
+  function syncAssemblyFields(progress){
+    const e=events[index];if(!e?.frame||!['encapsulate','decapsulate'].includes(e.kind))return;
+    for(const id of ['srcMAC','dstMAC','srcIP','dstIP']){const mac=id.endsWith('MAC');const show=e.kind==='encapsulate'?(mac?progress>=.4:progress>=.12):(!mac||progress<.68);const value=show?e.frame[id]:'—';if($(id).textContent!==value)$(id).textContent=value;}
+  }
+  function showCapture(event) {
+    if(!event?.frame||event.link!=='N1'||!['arp-request','arp-reply','data'].includes(event.kind))return;
+    const f=event.frame;
+    $('probeConclusion').textContent=config.encrypted?'MAC 可见 · IP 已加密':'MAC 与 IP 均可见';
+    $('listenLed').classList.add('listening');
+    if(!popupDismissed&&events[index]?.link==='N1')setProbeVisible(true);
+    const observedType=config.encrypted?(f.dstMAC==='FF-FF-FF-FF-FF-FF'?'广播无线帧':'单播无线帧'):(event.kind==='arp-request'?'ARP 广播':event.kind==='arp-reply'?'ARP 应答':'IP 数据帧');
+    $('probeState').textContent=`已监听 · ${observedType}`;
+    $('probeSrcMAC').textContent=f.srcMAC;$('probeDstMAC').textContent=f.dstMAC;
+    $('probeIPTitle').textContent=config.encrypted?'帧体内地址':f.protocol==='ARP'?'ARP 中的 IP':'IP';
+    $('visibilityBadge').textContent=config.encrypted?'帧体已加密':'帧体未加密';
+    $('probeSrcIP').textContent=config.encrypted?'🔒 无法读取':f.srcIP;
+    $('probeDstIP').textContent=config.encrypted?'🔒 无法读取':f.dstIP;
+    $('probeNote').textContent=config.encrypted?'无解密密钥 · 仅旁路监听':'可读 IP ≠ 可读 HTTPS 内容';
+  }
+  function clearCapture() {
+    setProbeVisible(false);
+    $('listenLed').classList.remove('listening');$('probeState').textContent='等待 N1 无线帧';
+    $('probeSrcMAC').textContent=$('probeDstMAC').textContent='—';$('probeSrcIP').textContent=$('probeDstIP').textContent='等待监听';
+    $('probeIPTitle').textContent='IP';$('visibilityBadge').textContent=config.encrypted?'帧体已加密':'帧体未加密';$('probeNote').textContent='只监听商场 Wi-Fi；不会跟随数据进入 N2、N3。';
+  }
+  function restoreCapture() {
+    clearCapture();
+    const priorEvents=index>0?events.slice(0,index):[];
+    const previous=direction==='return'?[...simulation.events,...priorEvents]:priorEvents;
+    previous.forEach(showCapture);
+    $('listenLed').classList.remove('listening');
+    if(index>=0&&events[index].link!=='N1'&&$('probeSrcMAC').textContent!=='—')$('probeState').textContent='保留上次监听 · 未捕获新帧';
+  }
+  function setFrame(event) {
+    const f=event?.frame;
+    const arp=f?.protocol==='ARP';
+    $('frameHint').textContent=arp?'ARP 解析本链路下一跳；不是 IP 数据报':'源 / 目的 IP 指向通信两端；MAC 交付本跳';
+    $('frameTitle').textContent=f?`${arp?'ARP':'IP 数据帧'} · ${event.link || ''}`:'等待封装';
+    $('srcIPLabel').textContent=arp?'发送方 IP（ARP）':'源 IP';$('dstIPLabel').textContent=arp?'目标 IP（ARP）':'目的 IP';
+    $('payload').textContent=arp?'ARP':'数据';
+    for(const id of ['srcMAC','dstMAC','srcIP','dstIP']){
+      const el=$(id),value=event?.kind==='encapsulate'?'—':f?.[id]||'—';
+      const changed=el.textContent!==value;el.textContent=value;
+      el.parentElement.classList.remove('changed');if(changed&&f){void el.offsetWidth;el.parentElement.classList.add('changed');}
+    }
+    $('arpNote').hidden=!arp;
+    if(arp)$('arpNote').textContent=event.kind==='arp-request'?`帧目的 MAC = 广播；ARP 目标 MAC = ${f.arpTargetMAC||'00-00-00-00-00-00'}（尚未知）。ARP 不属于 IP 数据报。`:'单播应答：告知自己的 MAC，同时已学到请求者的 IP–MAC 映射。';
+  }
+  function updateComparison() {
+    const completed=direction==='return'?[...simulation.events.map(e=>({...e,leg:'去程'})),...events.slice(0,index+1).map(e=>({...e,leg:'回程'}))]:events.slice(0,index+1).map(e=>({...e,leg:'去程'}));
+    const rows=completed.filter(e=>e.kind==='data'&&e.frame);
+    $('comparisonBody').innerHTML=rows.length?rows.map(e=>`<tr><td>${e.leg} / ${esc(e.link)}</td><td>${esc(e.frame.srcIP)}</td><td>${esc(e.frame.dstIP)}</td><td>${esc(e.frame.srcMAC)}</td><td>${esc(e.frame.dstMAC)}</td></tr>`).join(''):'<tr><td colspan="5">数据帧发出后，逐跳记录会显示在这里。</td></tr>';
+  }
+  function duration(){const e=events[index];return reducedMotion?900:({encapsulate:3400,decapsulate:2600,'arp-request':5200,'arp-reply':5200,data:2800}[e?.kind]||1700);}
+  function isDone(){return index===events.length-1&&!animating&&elapsed>=duration();}
+  function updateButtons() {
+    $('prevBtn').disabled=index<=0;
+    $('nextBtn').disabled=index>=events.length-1;
+    $('playBtn').textContent=animating?'Ⅱ 暂停':index>=0&&elapsed<duration()?'▶ 继续播放':'▶ 连续播放';
+    $('playBtn').disabled=isDone();
+    $('returnBtn').disabled=!(direction==='outbound'&&simulation.success&&isDone());
+    $('returnBtn').textContent=direction==='return'?'↩ 正在观察回程':'↩ 发送回包';
+  }
+  function renderEvent() {
+    const e=events[index];
+    document.querySelectorAll('.steps span').forEach((el,i)=>el.classList.toggle('active',i===(e?.stage??-1)));
+    $('eventTitle').textContent=e?(e.kind==='error'?e.detail:e.title):'选择目的设备，开始演示';
+    $('eventDetail').textContent=e?.detail||'点击“下一步”，先判断目的地址是否同网段。';
+    $('stepNumber').textContent=index<0?'→':String(index+1).padStart(2,'0');
+    $('eventCount').textContent=index<0?'':`${index+1} / ${events.length}`;
+    document.querySelector('.status-line').classList.toggle('error-state',e?.kind==='error');
+    restoreCapture();setFrame(e);if(e)setupPaths(e);else{scene.setEvent(null);assembly.setEvent(null);setProbeVisible(false);}
+    updateComparison();updateButtons();
+  }
+  function goTo(target,continuous=false) {
+    if(target<0||target>=events.length)return;
+    index=target;elapsed=0;captured=false;popupDismissed=false;animating=true;auto=continuous;lastTime=0;renderEvent();
+  }
+  function tick(now) {
+    if(animating&&index>=0){
+      if(lastTime)elapsed+=(now-lastTime)*Number($('speed').value);
+      lastTime=now;
+      const progress=Math.min(elapsed/duration(),1);drawMotion(progress);
+      if(progress>=(scene.captureAt??.78)&&!captured){showCapture(events[index]);captured=true;}
+      if(progress>=1){animating=false;lastTime=0;
+        if(auto&&index<events.length-1)goTo(index+1,true);
+        else{auto=false;updateButtons();}
+      }
+    }else lastTime=0;
+    requestAnimationFrame(tick);
+  }
+  function reset(newConfig=config) {
+    config={...newConfig};simulation=IPMAC.buildSimulation(config);events=simulation.events;direction='outbound';index=-1;elapsed=0;animating=false;auto=false;captured=false;selectedNode=null;
+    $('directionBadge').textContent='去程 · 手机 → 目的设备';
+    $('wifiBadge').textContent=config.encrypted?'加密 Wi-Fi':'开放 Wi-Fi';$('cacheBadge').textContent=config.cacheWarm?'ARP 缓存已预热':'ARP 缓存为空';
+    for(const [id,ip] of [['cashPreset','192.168.1.20'],['serverPreset','203.0.113.10']]){const active=config.destIP===ip;$(id).classList.toggle('selected',active);$(id).setAttribute('aria-pressed',String(active));}
+    if(!['192.168.1.20','203.0.113.10'].includes(config.destIP))$('directionBadge').textContent=`去程 · 目的 ${config.destIP}`;
+    drawNetwork();renderEvent();
+  }
+  $('nextBtn').addEventListener('click',()=>goTo(index+1));
+  $('prevBtn').addEventListener('click',()=>goTo(index-1));
+  $('restartBtn').addEventListener('click',()=>{index=-1;elapsed=0;animating=false;auto=false;drawNetwork();renderEvent();});
+  $('playBtn').addEventListener('click',()=>{if(animating){animating=false;auto=false;lastTime=0;}else if(index>=0&&elapsed<duration()){animating=true;auto=true;}else goTo(index+1,true);updateButtons();});
+  $('returnBtn').addEventListener('click',()=>{if($('returnBtn').disabled)return;direction='return';events=simulation.returnEvents;index=-1;elapsed=0;auto=false;animating=false;$('directionBadge').textContent='回程 · 目的设备 → 手机';drawNetwork();renderEvent();goTo(0);});
+  $('cashPreset').addEventListener('click',()=>reset({...config,destIP:'192.168.1.20'}));
+  $('serverPreset').addEventListener('click',()=>reset({...config,destIP:'203.0.113.10'}));
+  function fillForm(values){for(const [key,val] of Object.entries(values)){const field=$('settingsForm').elements.namedItem(key);if(!field)continue;if(field.type==='checkbox')field.checked=val;else field.value=val;}}
+  $('settingsBtn').addEventListener('click',()=>{animating=false;auto=false;updateButtons();fillForm(config);$('settingsDialog').showModal();});
+  $('defaultsBtn').addEventListener('click',()=>fillForm(IPMAC.DEFAULTS));
+  $('settingsForm').addEventListener('submit',event=>{event.preventDefault();const next={};for(const key of Object.keys(IPMAC.DEFAULTS)){const field=event.currentTarget.elements.namedItem(key);if(field)next[key]=field.type==='checkbox'?field.checked:field.value.trim();}reset(next);$('settingsDialog').close();if(simulation.errors?.length)goTo(0);});
+  $('probeToast').addEventListener('click',openProbe);
+  $('compareBtn').addEventListener('click',()=>{animating=false;auto=false;updateButtons();$('compareDialog').showModal();});
+  $('helpBtn').addEventListener('click',()=>{animating=false;auto=false;updateButtons();$('helpDialog').showModal();});
+  document.querySelectorAll('[data-close]').forEach(el=>el.addEventListener('click',()=>$(el.dataset.close).close()));
+  $('fullscreenBtn').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{$('fullscreenBtn').textContent='请按 F11 全屏';}});
+  let resizeTimer;addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{scene.render();assembly.position();drawMotion(index>=0?Math.min(elapsed/duration(),1):0);},100);});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){animating=false;auto=false;lastTime=0;updateButtons();}});
+  reset();requestAnimationFrame(tick);
+})();
+
+</script>
+</body></html>
+
+
